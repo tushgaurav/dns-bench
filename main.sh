@@ -13,7 +13,7 @@ BLUE='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m' # No Color
 
-# DNS servers to test (Name and IP)
+# DNS test servers
 declare -A DNS_SERVERS=(
   ["Cloudflare"]="1.1.1.1"
   ["Google"]="8.8.8.8"
@@ -23,6 +23,7 @@ declare -A DNS_SERVERS=(
   ["CleanBrowsing"]="185.228.168.168"
   ["Comodo"]="8.26.56.26"
   ["Level3"]="4.2.2.2"
+  ["ControlD"]="76.76.2.0"
 )
 
 # Test domains - popular websites
@@ -47,15 +48,19 @@ declare -A RESULTS
 print_header() {
   clear
   echo -e "${BOLD}${BLUE}"
+  echo "
+      ▌    ▄       ▌ 
+     ▛▌▛▌▛▘▙▘█▌▛▌▛▘▛▌  github.com/tushgaurav/dns-bench
+     ▙▌▌▌▄▌▙▘▙▖▌▌▙▖▌▌ Test and rank DNS servers by speed.         
+  "
   echo "╔═══════════════════════════════════════════════════════════╗"
-  echo "║                      DNS SPEED TEST                       ║"
-  echo "╚═══════════════════════════════════════════════════════════╝${NC}"
+  echo "║                      dnsBench v0.1                        ║"
+  echo "╚═══════════════════════════════════════════════════════════╝"
   echo ""
   echo -e "${YELLOW}Testing ${#DNS_SERVERS[@]} DNS servers with ${#TEST_DOMAINS[@]} domains...${NC}"
   echo ""
 }
 
-# Function to test DNS server speed
 test_dns_server() {
   local dns_name=$1
   local dns_ip=$2
@@ -142,7 +147,6 @@ display_results() {
   echo ""
 }
 
-# Check for required tools
 check_requirements() {
   if ! command -v dig &> /dev/null; then
     echo -e "${RED}Error: 'dig' command not found. Please install dnsutils or bind-utils.${NC}"
@@ -159,7 +163,6 @@ check_requirements() {
   fi
 }
 
-# Main function
 main() {
   check_requirements
   print_header
@@ -171,8 +174,6 @@ main() {
   display_results
 }
 
-# Run the script
 main
 
-# Exit cleanly
 exit 0
