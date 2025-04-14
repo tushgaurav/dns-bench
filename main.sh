@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # =========================================================
-# DNS Speed Test - Find your fastest DNS server
-# A tool for the homelab community
+# dnsBench - Test and rank DNS servers by speed
 # =========================================================
+
+VERSION="0.1"
 
 # Terminal colors
 RED='\033[0;31m'
@@ -38,7 +39,6 @@ TEST_DOMAINS=(
   "github.com"
 )
 
-# Number of query tests per domain
 TESTS_PER_DOMAIN=3
 
 # Results array
@@ -54,11 +54,29 @@ print_header() {
      ▙▌▌▌▄▌▙▘▙▖▌▌▙▖▌▌ Test and rank DNS servers by speed.         
   "
   echo "╔═══════════════════════════════════════════════════════════╗"
-  echo "║                      dnsBench v0.1                        ║"
+  echo "║                   Starting dnsBench v$VERSION                  ║"
   echo "╚═══════════════════════════════════════════════════════════╝"
+  echo ""
+  private_ip=$(get_private_ip)
+  public_ip=$(get_public_ip)
+  echo -e "${YELLOW}Your Private IP: ${BOLD}${private_ip}${NC}"
+  echo -e "${YELLOW}Your Public IP:  ${BOLD}${public_ip}${NC}"
   echo ""
   echo -e "${YELLOW}Testing ${#DNS_SERVERS[@]} DNS servers with ${#TEST_DOMAINS[@]} domains...${NC}"
   echo ""
+}
+
+get_private_ip() {
+    ip addr show | grep "inet " | grep -v "127.0.0.1" | awk '{print $2}' | cut -d"/" -f1 | head -n 1
+}
+
+get_public_ip() {
+    curl -s https://api.ipify.org
+}
+
+get_dns_fact() {
+    DNS_FACT_LAMBDA_URL="https://6ohig62uyt6bowmwojszlsyqey0ueaws.lambda-url.ap-south-1.on.aws/"
+    curl -s $DNS_FACT_LAMBDA_URL
 }
 
 test_dns_server() {
@@ -144,6 +162,8 @@ display_results() {
   echo ""
   echo -e "${BLUE}${BOLD}Recommendation:${NC} Use the fastest DNS server for better browsing experience."
   echo -e "${YELLOW}Note: Results may vary based on your location and network conditions.${NC}"
+  dns_fact=$(get_dns_fact)
+  echo -e "${YELLOW}${dns_fact}${NC}"
   echo ""
 }
 
@@ -159,6 +179,13 @@ check_requirements() {
     echo -e "${RED}Error: 'bc' command not found. Please install bc.${NC}"
     echo "  For Debian/Ubuntu: sudo apt install bc"
     echo "  For CentOS/RHEL: sudo yum install bc"
+    exit 1
+  fi
+
+  if ! command -v curl &> /dev/null; then
+    echo -e "${RED}Error: 'curl' command not found. Please install curl.${NC}"
+    echo "  For Debian/Ubuntu: sudo apt install curl"
+    echo "  For CentOS/RHEL: sudo yum install curl"
     exit 1
   fi
 }
