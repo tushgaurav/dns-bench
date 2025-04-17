@@ -93,8 +93,8 @@ test_dns_server() {
       # Use dig to query the DNS server and measure time
       result=$(dig @$dns_ip $domain +stats 2>/dev/null)
       
-      # Check if the query was successful
-      if [ $? -eq 0 ] && [[ $result == *"ANSWER: 1"* ]]; then
+      # Check if the query was successful (at least one answer)
+      if [ $? -eq 0 ] && echo "$result" | grep -E -q 'ANSWER: [1-9][0-9]*'; then
         # Extract query time (in ms)
         query_time=$(echo "$result" | grep "Query time:" | awk '{print $4}')
         total_time=$((total_time + query_time))
